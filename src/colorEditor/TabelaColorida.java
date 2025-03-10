@@ -4,15 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -32,15 +29,11 @@ public class TabelaColorida {
 
 	private static final int SCALE_FACTOR = 4;
 	private static String PALETTE_PATH;
-
-	private static final String IMAGE_PATH = "C:\\Users\\danie\\OneDrive\\Jogos\\SORRV5.1\\Tools\\rooframe.png";
-
 	public static Color[][] alternateColors = new Color[4][4];
 	public static File sorrPath;
 	public static Color[][] originalColors = new Color[4][4];
 	private static JTable tabela;
 	private static BufferedImage originalImage;
-	private static BufferedImage displayedImage;
 	private static JPanel imagePanel;
 	private static JLabel imageLabel = new JLabel();
 
@@ -113,6 +106,7 @@ public class TabelaColorida {
 
 		// Placeholder for future action listeners
 		selectCharacterButton.addActionListener(e -> {
+			
 			/* TODO: Add action */});
 		importButton.addActionListener(e -> {
 			/* TODO: Add action */});
@@ -241,15 +235,8 @@ public class TabelaColorida {
 		imagePanel = new JPanel(new BorderLayout());
 		imagePanel.setBorder(BorderFactory.createEmptyBorder()); // Remove borders
 
-		try {
-			originalImage = ImageIO.read(new File(IMAGE_PATH));
-		} catch (IOException e) {
-			System.out.println("Image not found or could not be loaded.");
-			return imagePanel;
-		}
+		originalImage = ImageColorChanger3.loadImage("images/"+ ConfigManager.selectedPalette + ".png");;
 
-		int scaledWidth = originalImage.getWidth(null) * SCALE_FACTOR;
-		int scaledHeight = originalImage.getHeight(null) * SCALE_FACTOR;
 		// Resize Image
 		Image scaledImage = resizeImage(originalImage);
 		imageLabel.setIcon(new ImageIcon(scaledImage));
