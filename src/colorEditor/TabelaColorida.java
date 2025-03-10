@@ -106,7 +106,12 @@ public class TabelaColorida {
 
 		// Placeholder for future action listeners
 		selectCharacterButton.addActionListener(e -> {
-			
+			ConfigManager.selectedPalette = PaletteSelector.showPaletteSelection();
+			ConfigManager.updatePalette(ConfigManager.selectedPalette);
+			PALETTE_PATH = sorrPath + File.separator + "palettes" + File.separator + "chars" + File.separator
+					+ ConfigManager.selectedPalette + ".pal";
+			initializeColors();
+			changeImage();
 			/* TODO: Add action */});
 		importButton.addActionListener(e -> {
 			/* TODO: Add action */});
@@ -235,7 +240,8 @@ public class TabelaColorida {
 		imagePanel = new JPanel(new BorderLayout());
 		imagePanel.setBorder(BorderFactory.createEmptyBorder()); // Remove borders
 
-		originalImage = ImageColorChanger3.loadImage("images/"+ ConfigManager.selectedPalette + ".png");;
+		originalImage = ImageColorChanger3.loadImage("images/" + ConfigManager.selectedPalette + ".png");
+		;
 
 		// Resize Image
 		Image scaledImage = resizeImage(originalImage);
@@ -265,26 +271,24 @@ public class TabelaColorida {
 	}
 
 	private static void changeImage() {
-	    // Chama o método que processa a imagem e retorna um BufferedImage
-	    BufferedImage originalImage = ImageColorChanger3.processImages();
+		// Chama o método que processa a imagem e retorna um BufferedImage
+		BufferedImage originalImage = ImageColorChanger3.processImages();
 
-	    // Verifica se a imagem foi processada corretamente
-	    if (originalImage != null) {
-	        // Redimensiona a imagem para 4x o tamanho original
-	        BufferedImage resizedImage = ImageResizer.resizeImage(originalImage, 
-	            originalImage.getWidth() * 4, 
-	            originalImage.getHeight() * 4);
+		// Verifica se a imagem foi processada corretamente
+		if (originalImage != null) {
+			// Redimensiona a imagem para 4x o tamanho original
+			BufferedImage resizedImage = ImageResizer.resizeImage(originalImage, originalImage.getWidth() * 4,
+					originalImage.getHeight() * 4);
 
-	        // Converte o BufferedImage redimensionado em ImageIcon
-	        ImageIcon imageIcon = new ImageIcon(resizedImage);
+			// Converte o BufferedImage redimensionado em ImageIcon
+			ImageIcon imageIcon = new ImageIcon(resizedImage);
 
-	        // Define o ícone no JLabel
-	        imageLabel.setIcon(imageIcon);
-	    } else {
-	        System.out.println("Erro ao processar a imagem.");
-	    }
+			// Define o ícone no JLabel
+			imageLabel.setIcon(imageIcon);
+		} else {
+			System.out.println("Erro ao processar a imagem.");
+		}
 	}
-
 
 	private static void handleImageClick(MouseEvent e, JLabel imageLabel) {
 		if (!(originalImage instanceof BufferedImage))

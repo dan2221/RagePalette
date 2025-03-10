@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 
 public class ConfigManager {
     public static File sorrPath;
@@ -48,6 +51,41 @@ public class ConfigManager {
             saveConfig();
         }
         return sorrPath;
+    }
+    
+    /**
+     * Altera a segunda linha do arquivo de configuração.
+     * @param newPalette O novo valor da paleta.
+     */
+    public static void updatePalette(String newPalette) {
+        File configFile = new File(CONFIG_FILE);
+
+        if (configFile.exists()) {
+            try {
+                // Lê todas as linhas do arquivo
+                List<String> lines = Files.readAllLines(Paths.get(CONFIG_FILE));
+
+                // Verifica se o arquivo tem pelo menos duas linhas
+                if (lines.size() >= 2) {
+                    // Altera a segunda linha
+                    lines.set(1, newPalette); // A segunda linha tem índice 1
+
+                    // Escreve as linhas de volta no arquivo
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
+                        for (String line : lines) {
+                            writer.write(line);
+                            writer.newLine();
+                        }
+                    }
+                } else {
+                    System.out.println("O arquivo não contém linhas suficientes para atualizar a paleta.");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("O arquivo de configuração não existe.");
+        }
     }
 
     private static void selectDirectory() {
