@@ -9,7 +9,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -237,29 +240,35 @@ public class TabelaColorida {
 	}
 
 	private static JPanel createImagePanel() {
-		imagePanel = new JPanel(new BorderLayout());
-		imagePanel.setBorder(BorderFactory.createEmptyBorder()); // Remove borders
+        imagePanel = new JPanel(new BorderLayout());
+        imagePanel.setBorder(BorderFactory.createEmptyBorder()); // Remove borders
 
-		originalImage = ImageColorChanger3.loadImage("images/" + ConfigManager.selectedPalette + ".png");
-		;
+        // Carregar a imagem original da pasta src/character_images/
+        originalImage = loadImage("character_images/" + ConfigManager.selectedPalette + ".png");
 
-		// Resize Image
-		Image scaledImage = resizeImage(originalImage);
-		imageLabel.setIcon(new ImageIcon(scaledImage));
+        // Verifica se a imagem foi carregada corretamente
+        if (originalImage == null) {
+            System.err.println("Failed to load the original image.");
+            return imagePanel; // Retorna um painel vazio se a imagem não for encontrada
+        }
 
-		// Add imageLabel directly to imagePanel (NO SCROLLPANE)
-		imagePanel.add(imageLabel, BorderLayout.NORTH); // Align to top
+        // Redimensionar a imagem
+        Image scaledImage = resizeImage(originalImage);
+        imageLabel.setIcon(new ImageIcon(scaledImage));
 
-		// Add MouseListener to imageLabel
-		imageLabel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				handleImageClick(e, imageLabel); // Now it correctly matches your original method's parameters
-			}
-		});
+        // Adicionar imageLabel diretamente ao imagePanel (sem JScrollPane)
+        imagePanel.add(imageLabel, BorderLayout.NORTH); // Alinha ao topo
 
-		return imagePanel;
-	}
+        // Adicionar MouseListener ao imageLabel
+        imageLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                handleImageClick(e, imageLabel); // Chama o método para lidar com o clique na imagem
+            }
+        });
+
+        return imagePanel;
+    }
 
 	// Método para redimensionar uma imagem
 	public static Image resizeImage(BufferedImage originalImg) {
@@ -268,6 +277,21 @@ public class TabelaColorida {
 		// Resize Image
 		Image scaledImage = originalImg.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
 		return scaledImage;
+	}
+
+	private static BufferedImage loadImage(String imagePath) {
+		// Implementação do método loadImage conforme discutido anteriormente
+		BufferedImage image = null;
+		try (InputStream is = TabelaColorida.class.getClassLoader().getResourceAsStream(imagePath)) {
+			if (is != null) {
+				image = ImageIO.read(is);
+			} else {
+				System.err.println("Image not found: " + imagePath);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return image;
 	}
 
 	private static void changeImage() {

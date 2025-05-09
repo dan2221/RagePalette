@@ -4,44 +4,44 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
 public class ImageColorChanger3 {
-	
+
 	public static BufferedImage loadImage(String imageName) {
-        // Obtém o ClassLoader da classe atual
-        ClassLoader classLoader = ImageColorChanger3.class.getClassLoader();
-        
-        // Carrega a imagem como um InputStream
-        try (InputStream inputStream = classLoader.getResourceAsStream(imageName)) {
-            if (inputStream == null) {
-                System.out.println("Imagem não encontrada: " + imageName);
-                return null;
-            }
-            // Lê a imagem a partir do InputStream
-            return ImageIO.read(inputStream);
-        } catch (Exception e) {
-            System.out.println("Erro ao carregar a imagem: " + e.getMessage());
-            return null;
-        }
-    }
-	
+		// Obtém o ClassLoader da classe atual
+		ClassLoader classLoader = ImageColorChanger3.class.getClassLoader();
+
+		// Carrega a imagem como um InputStream
+		try (InputStream inputStream = classLoader.getResourceAsStream(imageName)) {
+			if (inputStream == null) {
+				System.out.println("Imagem não encontrada: " + imageName);
+				return null;
+			}
+			// Lê a imagem a partir do InputStream
+			return ImageIO.read(inputStream);
+		} catch (Exception e) {
+			System.out.println("Erro ao carregar a imagem: " + e.getMessage());
+			return null;
+		}
+	}
+
 	public static BufferedImage processImages() {
 		// Carregar as cores originais e as novas cores
 		Color[][] originalColors = TabelaColorida.originalColors;
 		Color[][] alternateColors = TabelaColorida.alternateColors;
 
-		// Caminhos da imagem de entrada e saída
+		// Caminho da imagem de entrada
 		System.out.println("Getting loaded character from configuration: " + ConfigManager.selectedPalette);
-		//String inputPath = "C:\\Users\\danie\\OneDrive\\Jogos\\SORRV5.1\\Tools\\rooframe.png";
-		String outputPath = "C:\\Users\\danie\\OneDrive\\Jogos\\SORRV5.1\\Tools\\alter.png";
+		BufferedImage originalImage = loadImage("character_images/" + ConfigManager.selectedPalette + ".png");
 
-		// Carregar a imagem original
-		BufferedImage originalImage = loadImage("images/"+ ConfigManager.selectedPalette + ".png");
+		// Verifica se a imagem original foi carregada corretamente
+		if (originalImage == null) {
+			System.err.println("Failed to load the original image.");
+			return null; // Retorna null ou lança uma exceção conforme necessário
+		}
 
 		// Criar uma nova imagem para armazenar as partes recortadas
 		BufferedImage novaImagem = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(),
@@ -82,9 +82,7 @@ public class ImageColorChanger3 {
 			}
 		}
 
-		// Salvar a nova imagem
-//			ImageIO.write(novaImagem, "PNG", new File(outputPath));
-//			System.out.println("Processamento concluído! A nova imagem foi salva em: " + outputPath);
-		return novaImagem;
+		gNovaImagem.dispose(); // Libera os recursos gráficos
+		return novaImagem; // Retorna a nova imagem processada
 	}
 }
