@@ -39,6 +39,7 @@ public class TabelaColorida {
 	private static BufferedImage originalImage;
 	private static JPanel imagePanel;
 	private static JLabel imageLabel = new JLabel();
+	private static Timer imageUpdateTimer;
 
 	public static void main(String[] args) {
 		sorrPath = ConfigManager.getData();
@@ -119,7 +120,8 @@ public class TabelaColorida {
 		importButton.addActionListener(e -> {
 			/* TODO: Add action */});
 		saveButton.addActionListener(e -> {
-			/* TODO: Add action */});
+			PaletteSaver.savePaletteWithConfirmation(alternateColors, PALETTE_PATH);
+		});
 		exportButton.addActionListener(e -> {
 			/* TODO: Add action */});
 
@@ -234,10 +236,33 @@ public class TabelaColorida {
 				if (row != -1 && col != -1) {
 					alternateColors[row][col] = colorPanel.getSelectedColor();
 					tabela.repaint();
+					
+					// Schedule image update with debounce (300ms delay)
+					scheduleImageUpdate();
 				}
 			}
 		});
 		return colorPanel;
+	}
+
+	/**
+	 * Schedules an image update with a debounce timer to avoid excessive repaints.
+	 * Cancels the previous timer if it exists and creates a new one.
+	 */
+	private static void scheduleImageUpdate() {
+		// Cancel previous timer if it exists
+		if (imageUpdateTimer != null) {
+			imageUpdateTimer.cancel();
+		}
+
+		// Create a new timer that updates the image after 300ms of inactivity
+		imageUpdateTimer = new Timer();
+		imageUpdateTimer.schedule(new java.util.TimerTask() {
+			@Override
+			public void run() {
+				SwingUtilities.invokeLater(() -> changeImage());
+			}
+		}, 300); // 300ms debounce delay
 	}
 
 	private static JPanel createImagePanel() {
