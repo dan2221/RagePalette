@@ -33,9 +33,14 @@ public class ImageColorChanger3 {
 		Color[][] originalColors = TabelaColorida.originalColors;
 		Color[][] alternateColors = TabelaColorida.alternateColors;
 
-		// Caminho da imagem de entrada
+		// Carregue o personagem atualmente selecionado
 		System.out.println("Getting loaded character from configuration: " + ConfigManager.selectedPalette);
-		BufferedImage originalImage = loadImage("character_images/" + ConfigManager.selectedPalette + ".png");
+		
+		// Usa o ImageLoader para carregar a imagem com prioridade
+		BufferedImage originalImage = ImageLoader.loadCharacterImage(
+			ConfigManager.selectedPalette,
+			TabelaColorida.sorrPath
+		);
 
 		// Verifica se a imagem original foi carregada corretamente
 		if (originalImage == null) {
