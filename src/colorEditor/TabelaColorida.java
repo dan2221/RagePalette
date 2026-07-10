@@ -119,7 +119,14 @@ public class TabelaColorida {
 		importButton.addActionListener(e -> {
 			/* TODO: Add action */});
 		saveButton.addActionListener(e -> {
-			/* TODO: Add action */});
+		    boolean success = PaletteSaver.savePaletteWithConfirmation(
+		        TabelaColorida.alternateColors, 
+		        PALETTE_PATH
+		    );
+		    if (success) {
+		        System.out.println("Palette saved to: " + PALETTE_PATH);
+		    }
+		});
 		exportButton.addActionListener(e -> {
 			/* TODO: Add action */});
 
