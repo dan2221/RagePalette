@@ -11,7 +11,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Timer;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -40,7 +39,6 @@ public class TabelaColorida {
 	private static BufferedImage originalImage;
 	private static JPanel imagePanel;
 	private static JLabel imageLabel = new JLabel();
-	private static Timer imageUpdateTimer;
 
 	public static void main(String[] args) {
 		sorrPath = ConfigManager.getData();
@@ -91,10 +89,6 @@ public class TabelaColorida {
 		frame.add(mainPanel, BorderLayout.CENTER);
 		frame.add(createImagePanel(), BorderLayout.EAST);
 		frame.setVisible(true);
-		
-		// Load and display the initial image after GUI is ready
-		System.out.println("[INITIALIZATION] Loading initial character image on startup");
-		changeImage();
 	}
 
 	private static JPanel createButtonPanel() {
@@ -247,41 +241,28 @@ public class TabelaColorida {
 				if (row != -1 && col != -1) {
 					alternateColors[row][col] = colorPanel.getSelectedColor();
 					tabela.repaint();
-					
-					// Schedule image update with debounce (300ms delay)
-					scheduleImageUpdate();
 				}
 			}
 		});
 		return colorPanel;
 	}
 
-	/**
-	 * Schedules an image update with a debounce timer to avoid excessive repaints.
-	 * Cancels the previous timer if it exists and creates a new one.
-	 */
-	private static void scheduleImageUpdate() {
-		// Cancel previous timer if it exists
-		if (imageUpdateTimer != null) {
-			imageUpdateTimer.cancel();
-		}
-
-		// Create a new timer that updates the image after 300ms of inactivity
-		imageUpdateTimer = new Timer();
-		imageUpdateTimer.schedule(new java.util.TimerTask() {
-			@Override
-			public void run() {
-				SwingUtilities.invokeLater(() -> changeImage());
-			}
-		}, 300); // 300ms debounce delay
-	}
-
 	private static JPanel createImagePanel() {
 		imagePanel = new JPanel(new BorderLayout());
 		imagePanel.setBorder(BorderFactory.createEmptyBorder()); // Remove borders
 
-		// Create empty label - will be populated by changeImage() after GUI is ready
-		imageLabel.setText("Loading...");
+		// Carregar a imagem original da pasta src/character_images/
+		originalImage = loadImage("character_images/" + ConfigManager.selectedPalette + ".png");
+
+		// Verifica se a imagem foi carregada corretamente
+		if (originalImage == null) {
+			System.err.println("Failed to load the original image.");
+			return imagePanel; // Retorna um painel vazio se a imagem não for encontrada
+		}
+
+		// Redimensionar a imagem
+		Image scaledImage = resizeImage(originalImage);
+		imageLabel.setIcon(new ImageIcon(scaledImage));
 
 		// Adicionar imageLabel diretamente ao imagePanel (sem JScrollPane)
 		imagePanel.add(imageLabel, BorderLayout.NORTH); // Alinha ao topo
@@ -322,24 +303,14 @@ public class TabelaColorida {
 	}
 
 	private static void changeImage() {
-		// Carregar a imagem original usando ImageLoader com prioridade de arquivo do jogo
-		System.out.println("[IMAGE LOADER] Loading character image: " + ConfigManager.selectedPalette);
-		originalImage = ImageLoader.loadCharacterImage(ConfigManager.selectedPalette, sorrPath);
-
-		// Verifica se a imagem foi carregada corretamente
-		if (originalImage == null) {
-			System.err.println("[IMAGE LOADER] Failed to load the original image.");
-			return;
-		}
-
 		// Chama o método que processa a imagem e retorna um BufferedImage
-		BufferedImage processedImage = ImageColorChanger3.processImages();
+		BufferedImage originalImage = ImageColorChanger3.processImages();
 
 		// Verifica se a imagem foi processada corretamente
-		if (processedImage != null) {
+		if (originalImage != null) {
 			// Redimensiona a imagem para 4x o tamanho original
-			BufferedImage resizedImage = ImageResizer.resizeImage(processedImage, processedImage.getWidth() * 4,
-					processedImage.getHeight() * 4);
+			BufferedImage resizedImage = ImageResizer.resizeImage(originalImage, originalImage.getWidth() * 4,
+					originalImage.getHeight() * 4);
 
 			// Converte o BufferedImage redimensionado em ImageIcon
 			ImageIcon imageIcon = new ImageIcon(resizedImage);
