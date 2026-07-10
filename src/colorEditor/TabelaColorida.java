@@ -163,14 +163,15 @@ public class TabelaColorida {
 	private static JPanel createTablePanel() {
 		String[][] dados = new String[4][4];
 		String[] colunas = { "Column 1", "Column 2", "Column 3", "Column 4" };
-		tabela = new JTable(dados, colunas) {
+		tabela = new ColorTooltipTable();
+		tabela.setModel(new javax.swing.table.DefaultTableModel(dados, colunas) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
-		};
+		});
 		tabela.setDefaultRenderer(Object.class, new ColorRenderer());
 		tabela.setTableHeader(null);
 		tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -240,35 +241,35 @@ public class TabelaColorida {
 	}
 
 	private static JPanel createImagePanel() {
-        imagePanel = new JPanel(new BorderLayout());
-        imagePanel.setBorder(BorderFactory.createEmptyBorder()); // Remove borders
+		imagePanel = new JPanel(new BorderLayout());
+		imagePanel.setBorder(BorderFactory.createEmptyBorder()); // Remove borders
 
-        // Carregar a imagem original da pasta src/character_images/
-        originalImage = loadImage("character_images/" + ConfigManager.selectedPalette + ".png");
+		// Carregar a imagem original da pasta src/character_images/
+		originalImage = loadImage("character_images/" + ConfigManager.selectedPalette + ".png");
 
-        // Verifica se a imagem foi carregada corretamente
-        if (originalImage == null) {
-            System.err.println("Failed to load the original image.");
-            return imagePanel; // Retorna um painel vazio se a imagem não for encontrada
-        }
+		// Verifica se a imagem foi carregada corretamente
+		if (originalImage == null) {
+			System.err.println("Failed to load the original image.");
+			return imagePanel; // Retorna um painel vazio se a imagem não for encontrada
+		}
 
-        // Redimensionar a imagem
-        Image scaledImage = resizeImage(originalImage);
-        imageLabel.setIcon(new ImageIcon(scaledImage));
+		// Redimensionar a imagem
+		Image scaledImage = resizeImage(originalImage);
+		imageLabel.setIcon(new ImageIcon(scaledImage));
 
-        // Adicionar imageLabel diretamente ao imagePanel (sem JScrollPane)
-        imagePanel.add(imageLabel, BorderLayout.NORTH); // Alinha ao topo
+		// Adicionar imageLabel diretamente ao imagePanel (sem JScrollPane)
+		imagePanel.add(imageLabel, BorderLayout.NORTH); // Alinha ao topo
 
-        // Adicionar MouseListener ao imageLabel
-        imageLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                handleImageClick(e, imageLabel); // Chama o método para lidar com o clique na imagem
-            }
-        });
+		// Adicionar MouseListener ao imageLabel
+		imageLabel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				handleImageClick(e, imageLabel); // Chama o método para lidar com o clique na imagem
+			}
+		});
 
-        return imagePanel;
-    }
+		return imagePanel;
+	}
 
 	// Método para redimensionar uma imagem
 	public static Image resizeImage(BufferedImage originalImg) {
