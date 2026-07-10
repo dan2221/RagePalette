@@ -5,12 +5,15 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -25,12 +28,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 public class TabelaColorida {
 
 	private static final int SCALE_FACTOR = 4;
+	private static final List<Point> selectedCells = new ArrayList<>(2); // (row, col)
 	private static String PALETTE_PATH;
 	public static Color[][] alternateColors = new Color[4][4];
 	public static File sorrPath;
@@ -119,13 +121,10 @@ public class TabelaColorida {
 		importButton.addActionListener(e -> {
 			/* TODO: Add action */});
 		saveButton.addActionListener(e -> {
-		    boolean success = PaletteSaver.savePaletteWithConfirmation(
-		        TabelaColorida.alternateColors, 
-		        PALETTE_PATH
-		    );
-		    if (success) {
-		        System.out.println("Palette saved to: " + PALETTE_PATH);
-		    }
+			boolean success = PaletteSaver.savePaletteWithConfirmation(TabelaColorida.alternateColors, PALETTE_PATH);
+			if (success) {
+				System.out.println("Palette saved to: " + PALETTE_PATH);
+			}
 		});
 		exportButton.addActionListener(e -> {
 			/* TODO: Add action */});
@@ -162,7 +161,7 @@ public class TabelaColorida {
 		restoreBackupButton.addActionListener(e -> {
 			/* TODO: Add action */});
 		swapColorButton.addActionListener(e -> {
-		/* TODO: Add action */});
+			/* TODO: Add action */});
 
 		buttonPanel.add(undoButton);
 		buttonPanel.add(restorePaletteButton);
@@ -186,11 +185,46 @@ public class TabelaColorida {
 		});
 		tabela.setDefaultRenderer(Object.class, new ColorRenderer());
 		tabela.setTableHeader(null);
-		tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tabela.setCellSelectionEnabled(true);
+		tabela.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		// Select cell (0,0) at startup
 		tabela.setRowSelectionInterval(0, 0);
 		tabela.setColumnSelectionInterval(0, 0);
+
+		tabela.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				int row = tabela.rowAtPoint(e.getPoint());
+				int col = tabela.columnAtPoint(e.getPoint());
+				if (row < 0 || col < 0)
+					return;
+
+				boolean ctrl = (e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0;
+				Point p = new Point(row, col);
+
+				if (!ctrl) {
+					selectedCells.clear();
+					selectedCells.add(p);
+				} else {
+					if (selectedCells.contains(p)) {
+						selectedCells.remove(p);
+					} else {
+						if (selectedCells.size() == 2)
+							selectedCells.clear();
+						selectedCells.add(p);
+					}
+				}
+
+				tabela.clearSelection();
+
+				for (int i = 0; i < selectedCells.size(); i++) {
+					Point q = selectedCells.get(i);
+					boolean toggle = i > 0; // adiciona em vez de substituir
+					tabela.changeSelection(q.x, q.y, toggle, false);
+				}
+			}
+		});
 
 		JScrollPane scrollPane = new JScrollPane(tabela);
 		scrollPane.setPreferredSize(new Dimension(200, 50));
@@ -238,16 +272,21 @@ public class TabelaColorida {
 
 	private static JPanel createColorChooserPanel() {
 		ColorChooserPanel colorPanel = new ColorChooserPanel();
-		colorPanel.addColorChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
+		colorPanel.addColorChangeListener(e -> {
+			Color newColor = colorPanel.getSelectedColor();
+
+			if (selectedCells.isEmpty()) {
 				int row = tabela.getSelectedRow();
 				int col = tabela.getSelectedColumn();
 				if (row != -1 && col != -1) {
-					alternateColors[row][col] = colorPanel.getSelectedColor();
-					tabela.repaint();
+					selectedCells.add(new Point(row, col));
 				}
 			}
+
+			for (Point p : selectedCells) {
+				alternateColors[p.x][p.y] = newColor;
+			}
+			tabela.repaint();
 		});
 		return colorPanel;
 	}
