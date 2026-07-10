@@ -91,6 +91,10 @@ public class TabelaColorida {
 		frame.add(mainPanel, BorderLayout.CENTER);
 		frame.add(createImagePanel(), BorderLayout.EAST);
 		frame.setVisible(true);
+		
+		// Load and display the initial image after GUI is ready
+		System.out.println("[INITIALIZATION] Loading initial character image on startup");
+		changeImage();
 	}
 
 	private static JPanel createButtonPanel() {
@@ -276,18 +280,8 @@ public class TabelaColorida {
 		imagePanel = new JPanel(new BorderLayout());
 		imagePanel.setBorder(BorderFactory.createEmptyBorder()); // Remove borders
 
-		// Carregar a imagem original da pasta src/character_images/
-		originalImage = loadImage("character_images/" + ConfigManager.selectedPalette + ".png");
-
-		// Verifica se a imagem foi carregada corretamente
-		if (originalImage == null) {
-			System.err.println("Failed to load the original image.");
-			return imagePanel; // Retorna um painel vazio se a imagem não for encontrada
-		}
-
-		// Redimensionar a imagem
-		Image scaledImage = resizeImage(originalImage);
-		imageLabel.setIcon(new ImageIcon(scaledImage));
+		// Create empty label - will be populated by changeImage() after GUI is ready
+		imageLabel.setText("Loading...");
 
 		// Adicionar imageLabel diretamente ao imagePanel (sem JScrollPane)
 		imagePanel.add(imageLabel, BorderLayout.NORTH); // Alinha ao topo
@@ -328,14 +322,24 @@ public class TabelaColorida {
 	}
 
 	private static void changeImage() {
+		// Carregar a imagem original usando ImageLoader com prioridade de arquivo do jogo
+		System.out.println("[IMAGE LOADER] Loading character image: " + ConfigManager.selectedPalette);
+		originalImage = ImageLoader.loadCharacterImage(ConfigManager.selectedPalette, sorrPath);
+
+		// Verifica se a imagem foi carregada corretamente
+		if (originalImage == null) {
+			System.err.println("[IMAGE LOADER] Failed to load the original image.");
+			return;
+		}
+
 		// Chama o método que processa a imagem e retorna um BufferedImage
-		BufferedImage originalImage = ImageColorChanger3.processImages();
+		BufferedImage processedImage = ImageColorChanger3.processImages();
 
 		// Verifica se a imagem foi processada corretamente
-		if (originalImage != null) {
+		if (processedImage != null) {
 			// Redimensiona a imagem para 4x o tamanho original
-			BufferedImage resizedImage = ImageResizer.resizeImage(originalImage, originalImage.getWidth() * 4,
-					originalImage.getHeight() * 4);
+			BufferedImage resizedImage = ImageResizer.resizeImage(processedImage, processedImage.getWidth() * 4,
+					processedImage.getHeight() * 4);
 
 			// Converte o BufferedImage redimensionado em ImageIcon
 			ImageIcon imageIcon = new ImageIcon(resizedImage);
