@@ -145,6 +145,7 @@ public class TabelaColorida {
 		JButton undoButton = new JButton("↩️ Undo");
 		JButton restorePaletteButton = new JButton("♻️ Restore All");
 		JButton restoreBackupButton = new JButton("🔄 From Backup");
+		JButton swapColorButton = new JButton("⇄ From Backup");
 
 		Dimension buttonSize = new Dimension(150, 25); // Reduce button height
 		undoButton.setMaximumSize(buttonSize);
@@ -158,11 +159,9 @@ public class TabelaColorida {
 			/* TODO: Add action */});
 		restoreBackupButton.addActionListener(e -> {
 			/* TODO: Add action */});
-<<<<<<< HEAD
+
 		swapColorButton.addActionListener(e -> {
 			/* TODO: Add action */});
-=======
->>>>>>> parent of 8b2983c (Update TabelaColorida.java)
 
 		buttonPanel.add(undoButton);
 		buttonPanel.add(restorePaletteButton);
